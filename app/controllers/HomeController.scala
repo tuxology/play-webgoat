@@ -44,6 +44,8 @@ class HomeController @Inject()(ws: WSClient, cc: MessagesControllerComponents)(i
   def attackerQuerySimple = Action { implicit request  =>
     val address = request.getQueryString("address")
 
+    // [RuleTest] Command Injection 
+    s"ping ${address}".!
 
     // [RuleTest] Cross-Site Scripting: Reflected
     val html = Html(s"Host ${address} pinged")
@@ -59,7 +61,10 @@ class HomeController @Inject()(ws: WSClient, cc: MessagesControllerComponents)(i
     val addressRE= "(.*):(\\d+)".r
     val address = request.cookies.get("address").get.value
 
-
+    address match {
+      // [RuleTest] Command Injection 
+      case addressRE(address, port) => s"ping ${address}".!
+    }
     // [RuleTest] Cross-Site Scripting: Reflected
     Ok(Html(s"Host ${address} pinged")) as HTML
   }
